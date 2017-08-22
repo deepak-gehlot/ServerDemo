@@ -1,18 +1,12 @@
 package com.saver.android;
 
 import android.Manifest;
-import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.github.jksiezni.permissive.PermissionsGrantedListener;
@@ -20,8 +14,6 @@ import com.github.jksiezni.permissive.PermissionsRefusedListener;
 import com.github.jksiezni.permissive.Permissive;
 import com.saver.android.adapter.ImagePagerAdapter;
 import com.saver.android.databinding.ActivityMainBinding;
-import com.saver.android.fragment.ImageFragment;
-import com.saver.android.fragment.VideoFragment;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -29,7 +21,7 @@ import java.util.Arrays;
 
 import static org.apache.commons.io.comparator.LastModifiedFileComparator.LASTMODIFIED_REVERSE;
 
-public class MainActivity extends AppCompatActivity {
+public class DownloadListActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
 
@@ -39,30 +31,14 @@ public class MainActivity extends AppCompatActivity {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         setSupportActionBar(binding.toolbar);
         getListOfFiles();
-    }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_create_invoice, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_share:
-
-                return true;
-            case R.id.action_download:
-                startActivity(new Intent(MainActivity.this, DownloadListActivity.class));
-                return true;
-            case R.id.action_disclamer:
-
-                return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+        binding.toolbar.setNavigationIcon(R.drawable.ic_arrow_back);
+        binding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onBackPressed();
+            }
+        });
     }
 
     private void getListOfFiles() {
@@ -73,7 +49,11 @@ public class MainActivity extends AppCompatActivity {
                         // given permissions are granted
                         ArrayList<File> result = new ArrayList<>(); //ArrayList cause you don't know how many files there is
                         try {
-                            File folder = new File(new StringBuffer().append(Environment.getExternalStorageDirectory().getAbsolutePath()).append("/WhatsApp/Media/.Statuses/").toString());
+                            File folder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/" + Constant.FOLDER_NAME);
+                            if (!folder.exists()) {
+                                Toast.makeText(DownloadListActivity.this, "No file found.", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
                             File[] filesInFolder = folder.listFiles(); // This returns all the folders and files in your path
                             Arrays.sort(filesInFolder, LASTMODIFIED_REVERSE);
                             for (File file : filesInFolder) { //For each of the entries do:
@@ -90,12 +70,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPermissionsRefused(String[] permissions) {
                 // given permissions are refused
-                Toast.makeText(MainActivity.this, "App Required permission.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(DownloadListActivity.this, "App Required permission.", Toast.LENGTH_SHORT).show();
                 finish();
             }
-        }).execute(MainActivity.this);
+        }).execute(DownloadListActivity.this);
     }
-
 
     private void setList(final ArrayList<File> files) {
         files.add(0, null);
@@ -108,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        ImagePagerAdapter adapter = new ImagePagerAdapter(MainActivity.this, files);
+        ImagePagerAdapter adapter = new ImagePagerAdapter(DownloadListActivity.this, files);
         binding.hicvp.setAdapter(adapter);
 
         //binding.setFile(files.get(0));
@@ -136,49 +115,5 @@ public class MainActivity extends AppCompatActivity {
         } else {
             binding.messageTxt.setVisibility(View.GONE);
         }*/
-    }
-
-    /**
-     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
-     * one of the sections/tabs/pages.
-     */
-    public class SectionsPagerAdapter extends FragmentPagerAdapter {
-
-        public SectionsPagerAdapter(FragmentManager fm) {
-            super(fm);
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            Fragment fragment = null;
-            switch (position) {
-                case 0:
-                    fragment = ImageFragment.newInstance();
-                    break;
-                case 1:
-                    fragment = VideoFragment.newInstance();
-                    break;
-            }
-            return fragment;
-        }
-
-        @Override
-        public int getCount() {
-            // Show 2 total pages.
-            return 2;
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            switch (position) {
-               /* case 0:
-                    return "How To Use";*/
-                case 0:
-                    return "Images";
-                case 1:
-                    return "Videos";
-            }
-            return null;
-        }
     }
 }

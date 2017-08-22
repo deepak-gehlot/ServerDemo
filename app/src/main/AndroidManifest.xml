@@ -12,7 +12,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="sensorPortrait"
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -22,8 +25,16 @@
         <activity
             android:name=".FullImageActivity"
             android:label="Image"
-            android:theme="@style/AppTheme.Translucent">
-        </activity>
+            android:screenOrientation="sensorPortrait"
+            android:theme="@style/AppTheme.Translucent"/>
+
+
+        <activity
+            android:name=".DownloadListActivity"
+            android:label="My Downloads"
+            android:screenOrientation="sensorPortrait"
+            android:theme="@style/AppTheme"/>
+
     </application>
 
 </manifest>
