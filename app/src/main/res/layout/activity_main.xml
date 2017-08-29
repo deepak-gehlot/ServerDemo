@@ -22,6 +22,7 @@
             android:background="@color/colorPrimary"
             app:titleTextColor="@color/white"/>
 
+
         <ImageView
             android:id="@+id/backgroundImage"
             android:layout_width="match_parent"
@@ -30,18 +31,19 @@
             android:scaleType="centerCrop"
             app:imageFileBlur="@{file}"/>
 
-        <com.gigamole.infinitecycleviewpager.HorizontalInfiniteCycleViewPager
-            android:id="@+id/hicvp"
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@+id/toolbar"
-            app:icvp_center_page_scale_offset="30dp"
-            app:icvp_interpolator="@android:anim/accelerate_decelerate_interpolator"
-            app:icvp_max_page_scale="0.9"
-            app:icvp_medium_scaled="false"
-            app:icvp_min_page_scale="0.7"
-            app:icvp_min_page_scale_offset="5dp"
-            app:icvp_scroll_duration="250"/>
+            android:visibility="gone"/>
+
+        <com.yarolegovich.discretescrollview.DiscreteScrollView
+            android:id="@+id/item_picker"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/toolbar"/>
 
     </RelativeLayout>
 </layout>

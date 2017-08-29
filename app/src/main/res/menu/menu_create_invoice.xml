@@ -22,4 +22,10 @@
         android:title="Disclaimer"
         app:showAsAction="always"/>
 
+    <!--<item
+        android:id="@+id/action_flip"
+        android:icon="@drawable/ic_flip"
+        android:orderInCategory="100"
+        android:title="flip"
+        app:showAsAction="always"/>-->
 </menu>

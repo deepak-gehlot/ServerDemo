@@ -1,0 +1,2 @@
+alias: statusdownloader
+pass : 123456789

@@ -4,15 +4,31 @@ import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.net.Uri;
+import android.os.Environment;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
+import com.appunite.appunitevideoplayer.PlayerActivity;
+import com.google.android.gms.ads.AdRequest;
+import com.saver.android.FullImageActivity;
 import com.saver.android.R;
+import com.saver.android.databinding.AdViewGridBinding;
 import com.saver.android.databinding.ImageRowBinding;
+import com.saver.android.util.Constant;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URLConnection;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 
 /**
@@ -22,7 +38,7 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.View
 
     private Context context;
     private ArrayList<File> files;
-    private int TYPE_FREE_SPACE = 0;
+    private int TYPE_AD = 0;
     private int TYPE_VIEW = 1;
 
     public ImageListAdapter(Context context, ArrayList<File> files) {
@@ -32,69 +48,69 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.View
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        ImageRowBinding imageRowBinding = DataBindingUtil.inflate(LayoutInflater.from(parent.getContext()), R.layout.image_row, parent, false);
-        return new ViewHolder(imageRowBinding);
-
+        if (viewType == TYPE_AD) {
+            AdViewGridBinding adViewBinding = DataBindingUtil.inflate(LayoutInflater.from(parent.getContext()), R.layout.ad_view_grid, parent, false);
+            return new ViewHolder(adViewBinding);
+        } else {
+            ImageRowBinding imageRowBinding = DataBindingUtil.inflate(LayoutInflater.from(parent.getContext()), R.layout.image_row, parent, false);
+            return new ViewHolder(imageRowBinding);
+        }
     }
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        //   if (getItemViewType(position) == TYPE_FREE_SPACE) {
-
-        //  } else if (getItemViewType(position) == TYPE_VIEW) {
-        try {
-            holder.binding.setFile(files.get(position));
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (files.get(position) == null) {
+            AdRequest adRequest1 = new AdRequest.Builder().build();
+            holder.adViewBinding.adView3.loadAd(adRequest1);
+        } else {
+            try {
+                holder.binding.setFile(files.get(position));
+                holder.binding.setAdapter(this);
+                if (isVideoFile(Uri.fromFile(files.get(position)).toString())) {
+                    holder.binding.playImg.setVisibility(View.VISIBLE);
+                } else {
+                    holder.binding.playImg.setVisibility(View.GONE);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-           /* if (isVideoFile(Uri.fromFile(files.get(position)).toString())) {
-                holder.binding.playButtonIcon.setVisibility(View.VISIBLE);
-            } else {
-                holder.binding.playButtonIcon.setVisibility(View.GONE);
-            }*/
-        //}
     }
 
     @Override
     public int getItemViewType(int position) {
-        if (position == files.size() - 1) {
-            return TYPE_FREE_SPACE;
+        if (files.get(position) == null) {
+            return TYPE_AD;
         } else {
             return TYPE_VIEW;
         }
     }
 
-   /* public static boolean isVideoFile(String path) {
+
+    @Override
+    public int getItemCount() {
+        return files.size();
+    }
+
+    class ViewHolder extends RecyclerView.ViewHolder {
+
+        ImageRowBinding binding;
+        AdViewGridBinding adViewBinding;
+
+        private ViewHolder(ImageRowBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
+        }
+
+        private ViewHolder(AdViewGridBinding binding) {
+            super(binding.getRoot());
+            this.adViewBinding = binding;
+        }
+    }
+
+    private static boolean isVideoFile(String path) {
         String mimeType = URLConnection.guessContentTypeFromName(path);
         return mimeType != null && mimeType.startsWith("video");
-    }
-
-    public void onFilterClick(File file) {
-        if (isVideoFile(Uri.fromFile(file).toString())) {
-            Toast.makeText(context, "You can not apply filter on video.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        context.startActivity(new Intent(context, PhotoFileterActivity2.class).putExtra("file", file));
-    }
-
-    */
-
-    /**
-     * on Item click listener method
-     *
-     * @param file
-     *//*
-    public void onShareInstaClick(File file) {
-        if (isVideoFile(Uri.fromFile(file).toString())) {
-            createInstagramVideoIntent(file);
-        } else {
-            createInstagramIntent(file);
-        }
-        //  context.startActivity(new Intent(context, CreateMemesActivity.class).putExtra("file", file));
-        // context.startActivity(new Intent(context, PhotoFileterActivity.class).putExtra("file", file));
-        //context.startActivity(new Intent(context, PhotoFileterActivity2.class).putExtra("file", file));
-        //  context.startActivity(new Intent(context, PhotoFilter2Activity.class).putExtra("file", file));
-        //context.startActivity(new Intent(context, CollageActivity.class));
     }
 
     public void onItemClick(File file) {
@@ -105,79 +121,59 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.View
         } else {
             context.startActivity(new Intent(context, FullImageActivity.class).putExtra("item", file));
         }
-    }*/
-    @Override
-    public int getItemCount() {
-        return files.size();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    public void saveImage(File sourceLocation) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
 
-        ImageRowBinding binding;
-
-        public ViewHolder(ImageRowBinding binding) {
-            super(binding.getRoot());
-            this.binding = binding;
-        }
-    }
-
-    private void createInstagramIntent(File file) {
+            }
+        }).start();
         try {
-            String type = "image/*";
-            Intent shareIntent = new Intent(
-                    Intent.ACTION_SEND);
-            shareIntent.setType(type);
-            shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
-            shareIntent.putExtra(Intent.EXTRA_SUBJECT, "");
-            shareIntent.putExtra(Intent.EXTRA_TEXT,
-                    "Check this out, what do you think?"
-                            + System.getProperty("line.separator")
-                            + "desc");
-            shareIntent.setPackage("com.instagram.android");
-            context.startActivity(shareIntent);
+            File path = Environment.getExternalStorageDirectory();
+            File folder = new File(Environment.getExternalStorageDirectory() + "/" + Constant.FOLDER_NAME);
+            if (!folder.exists()) {
+                folder.mkdir();
+            }
+            String fileFormat = "";
+            if (isVideoFile(Uri.fromFile(sourceLocation).toString())) {
+                fileFormat = ".mp4";
+            } else {
+                fileFormat = ".jpg";
+            }
 
-        } catch (Exception e) {
+            // Create a media file name
+            String timeStamp = new SimpleDateFormat("ddMMyyyy_HHmm").format(new Date());
+            String mImageName = "Whats_" + timeStamp + fileFormat;
+            File dest = new File(path, Constant.FOLDER_NAME + "/" + mImageName);
+            InputStream in = new FileInputStream(sourceLocation);
+            OutputStream out = new FileOutputStream(dest);
+
+            // Copy the bits from instream to outstream
+            byte[] buf = new byte[1024];
+            int len;
+
+            while ((len = in.read(buf)) > 0) {
+                out.write(buf, 0, len);
+            }
+
+            in.close();
+            out.close();
+            Toast.makeText(context, "Save successfully.", Toast.LENGTH_SHORT).show();
+        } catch (IOException e) {
             e.printStackTrace();
-            // bring user to the market to download the app.
-            // or let them choose an app?
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.setData(Uri.parse("market://details?id="
-                    + "com.instagram.android"));
-            context.startActivity(intent);
-        }
-    }
-
-    private void createInstagramVideoIntent(File file) {
-        try {
-            String type = "video/*";
-            Intent shareIntent = new Intent(
-                    Intent.ACTION_SEND);
-            shareIntent.setType(type);
-            shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
-            shareIntent.putExtra(Intent.EXTRA_SUBJECT, "");
-            shareIntent.putExtra(Intent.EXTRA_TEXT,
-                    "Check this out, what do you think?"
-                            + System.getProperty("line.separator")
-                            + "desc");
-            shareIntent.setPackage("com.instagram.android");
-            context.startActivity(shareIntent);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            // bring user to the market to download the app.
-            // or let them choose an app?
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.setData(Uri.parse("market://details?id="
-                    + "com.instagram.android"));
-            context.startActivity(intent);
+            Toast.makeText(context, "Save failed.", Toast.LENGTH_SHORT).show();
         }
     }
 
     public void createOtherAppShareIntent(File photoFile) {
         final Intent shareIntent = new Intent(Intent.ACTION_SEND);
-        shareIntent.setType("image/*");
+        if (isVideoFile(Uri.fromFile(photoFile).toString())) {
+            shareIntent.setType("video/*");
+        } else {
+            shareIntent.setType("image/*");
+        }
         shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(photoFile));
         context.startActivity(Intent.createChooser(shareIntent, "Share image using"));
     }
