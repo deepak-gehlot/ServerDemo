@@ -12,19 +12,22 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
 
 import com.github.jksiezni.permissive.PermissionsGrantedListener;
 import com.github.jksiezni.permissive.PermissionsRefusedListener;
 import com.github.jksiezni.permissive.Permissive;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
 import com.saver.android.adapter.ImageListAdapter;
 import com.saver.android.databinding.ActivityMainBinding;
 import com.saver.android.util.Extension;
+import com.saver.android.util.PreferenceConnector;
 import com.saver.android.util.ValidationTemplate;
 import com.yarolegovich.discretescrollview.DiscreteScrollView;
 import com.yarolegovich.discretescrollview.InfiniteScrollAdapter;
@@ -56,6 +59,48 @@ public class MainActivity extends AppCompatActivity implements DiscreteScrollVie
             }
         }, 400);
 
+        int count = PreferenceConnector.readInteger(MainActivity.this, PreferenceConnector.SHOW_AD_COUNT, 0);
+        //   if (count == 4) { // show ad
+        PreferenceConnector.writeInteger(MainActivity.this, PreferenceConnector.SHOW_AD_COUNT, 0);
+        final InterstitialAd mInterstitialAd = new InterstitialAd(this);
+        mInterstitialAd.setAdUnitId("ca-app-pub-7317243541737447/7427644400");
+        mInterstitialAd.loadAd(new AdRequest.Builder().build());
+        mInterstitialAd.setAdListener(new AdListener() {
+            @Override
+            public void onAdLoaded() {
+                // Code to be executed when an ad finishes loading.
+                Log.i("Ads", "onAdLoaded");
+                mInterstitialAd.show();
+            }
+
+            @Override
+            public void onAdFailedToLoad(int errorCode) {
+                // Code to be executed when an ad request fails.
+                Log.i("Ads", "onAdFailedToLoad");
+            }
+
+            @Override
+            public void onAdOpened() {
+                // Code to be executed when the ad is displayed.
+                Log.i("Ads", "onAdOpened");
+            }
+
+            @Override
+            public void onAdLeftApplication() {
+                // Code to be executed when the user has left the app.
+                Log.i("Ads", "onAdLeftApplication");
+            }
+
+            @Override
+            public void onAdClosed() {
+                // Code to be executed when when the interstitial ad is closed.
+                Log.i("Ads", "onAdClosed");
+            }
+        });
+       /* } else {
+            count = count + 1;
+            PreferenceConnector.writeInteger(MainActivity.this, PreferenceConnector.SHOW_AD_COUNT, count);
+        }*/
     }
 
     @Override
@@ -77,17 +122,6 @@ public class MainActivity extends AppCompatActivity implements DiscreteScrollVie
             case R.id.action_disclamer:
                 showDisclaimer();
                 return true;
-           /* case R.id.action_flip:
-                *//*if (viewTag == 1) {
-                    viewTag = 2;
-                    setGrid();
-                    binding.hicvp.setVisibility(View.GONE);
-                } else {
-                    viewTag = 1;
-                    setCard();
-                    binding.recyclerView.setVisibility(View.GONE);
-                }*//*
-                return true;*/
         }
 
         return super.onOptionsItemSelected(item);
@@ -128,13 +162,6 @@ public class MainActivity extends AppCompatActivity implements DiscreteScrollVie
             }
         }
         setCard();
-    }
-
-    private void setGrid() {
-        StaggeredGridLayoutManager gridLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
-        binding.recyclerView.setLayoutManager(gridLayoutManager);
-        binding.recyclerView.setAdapter(new ImageListAdapter(MainActivity.this, files));
-        binding.recyclerView.setVisibility(View.VISIBLE);
     }
 
     private void setCard() {

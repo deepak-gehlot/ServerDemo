@@ -10,6 +10,7 @@ public class PreferenceConnector {
     public static final int MODE = Context.MODE_PRIVATE;
     public static final String DEVICE_HEIGHT = "device_height";
     public static final String DEVICE_WIDTH = "device_width";
+    public static final String SHOW_AD_COUNT = "SHOW_AD_COUNT";
 
     public static void writeBoolean(Context context, String key, boolean value) {
         getEditor(context).putBoolean(key, value).commit();

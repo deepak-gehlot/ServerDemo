@@ -15,8 +15,9 @@ import android.widget.Toast;
 import com.github.jksiezni.permissive.PermissionsGrantedListener;
 import com.github.jksiezni.permissive.PermissionsRefusedListener;
 import com.github.jksiezni.permissive.Permissive;
-import com.saver.android.adapter.ImageListAdapter;
+import com.saver.android.adapter.DownloadImageListAdapter;
 import com.saver.android.databinding.ActivityMainBinding;
+import com.saver.android.listener.DeleteListener;
 import com.saver.android.util.Constant;
 import com.saver.android.util.Extension;
 import com.saver.android.util.ValidationTemplate;
@@ -130,7 +131,8 @@ public class DownloadListActivity extends AppCompatActivity {
 
     private void setCard(final ArrayList<File> files) {
         binding.itemPicker.setOrientation(Orientation.HORIZONTAL);
-        final InfiniteScrollAdapter infiniteAdapter = InfiniteScrollAdapter.wrap(new ImageListAdapter(DownloadListActivity.this, files));
+        DownloadImageListAdapter adapter = new DownloadImageListAdapter(DownloadListActivity.this, files);
+        final InfiniteScrollAdapter infiniteAdapter = InfiniteScrollAdapter.wrap(adapter);
         binding.itemPicker.setAdapter(infiniteAdapter);
         binding.itemPicker.setItemTransitionTimeMillis(150);
         binding.itemPicker.setItemTransformer(new ScaleTransformer.Builder()
@@ -140,10 +142,19 @@ public class DownloadListActivity extends AppCompatActivity {
             @Override
             public void onCurrentItemChanged(@Nullable RecyclerView.ViewHolder viewHolder, int adapterPosition) {
                 int pos = infiniteAdapter.getRealCurrentPosition();
-                File file = files.get(pos);
-                if (file != null) {
-                    binding.setFile(file);
+                if (pos > -1) {
+                    File file = files.get(pos);
+                    if (file != null) {
+                        binding.setFile(file);
+                    }
                 }
+            }
+        });
+
+        adapter.setDeleteListener(new DeleteListener() {
+            @Override
+            public void onDelete() {
+                infiniteAdapter.notifyDataSetChanged();
             }
         });
     }

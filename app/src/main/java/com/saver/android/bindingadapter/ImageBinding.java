@@ -19,6 +19,7 @@ public class ImageBinding {
     public static void loadImageFromFile(ImageView imageView, File file) {
         Glide.with(imageView.getContext())
                 .load(file)
+                .override(350, 450)
                 .into(imageView);
 
        /* Glide
